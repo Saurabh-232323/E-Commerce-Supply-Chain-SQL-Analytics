@@ -1,0 +1,1163 @@
+-- select *
+-- from `e1.products`
+-- where MRP> (select avg(MRP) from `e1.products`)
+
+-- select *
+-- from `e1.products`
+-- where MRP in (select distinct MRP from `e1.products` order by MRP desc limit 5)
+
+-- select *
+-- from `e1.products`
+-- where MRP = (select max(MRP) from `e1.products`)
+
+-- select *
+-- from `e1.products`
+-- where SupplierID in (
+--                       select SupplierID
+--                       from `e1.products`
+--                       group by SupplierID
+--                       having count(ProductID) >=5
+--                     )
+
+-- select *
+-- from `e1.customers`
+-- where customerID in
+--                     (
+--                       select CustomerID
+--                       from `e1.orders`
+--                       group by CustomerID
+--                       having count(orderID) >=3
+--                       )
+
+
+-- select SupplierID
+-- from `e1.products`
+-- group by SupplierID
+-- having count(ProductID) >=
+-- (
+--   select avg(no_of_products) from (select count(*) as no_of_products from `e1.products` group by SupplierID)
+-- )
+
+-- alter table `e1.categories` 
+-- rename column string_field_0 to CategoryID;
+-- alter table `e1.categories` 
+-- rename column string_field_1 to CategoryName;
+
+
+-- select 
+--   p1.ProductName,
+--   c1.CategoryName
+-- from `e1.products` p1 inner join `e1.categories` c1 on p1.CategoryID=c1.CategoryID
+-- where c1.CategoryName="Electronics";
+
+
+-- select 
+--   p1.ProductName,
+--   c1.CategoryName,
+--   p1.MRP 
+-- from `e1.products` p1 inner join `e1.categories` c1 on p1.CategoryID=c1.CategoryID
+-- order by p1.MRP desc
+-- ;
+
+
+-- select 
+--   p1.ProductName,
+--   c1.CategoryName,
+--   p1.MRP-p1.SellingPrice as Discount
+-- from `e1.products` p1 inner join `e1.categories` c1 on p1.CategoryID=c1.CategoryID
+-- where p1.MRP>p1.SellingPrice;
+
+
+-- select 
+--   p1.ProductName,
+--   s1.SupplierID,
+--   s1.State
+-- from `e1.products` p1 inner join `e1.suppliers` s1 on p1.SupplierID=s1.SupplierID;
+
+
+
+-- select
+--   o.orderID,
+--   c.Name,
+--   c.city
+-- from `e1.orders` o inner join `e1.customers` c on o.CustomerID=c.customerID
+-- where o.status="Cancelled"
+
+
+-- select
+--   OrderID,
+--   sum(total) as totl_sales
+-- from `e1.order_items` group by OrderID
+-- order by OrderID;
+
+-- select 
+--   c.CustomerID,
+--   sum(oi.total) as total_sales
+-- from `e1.customers` c inner join `e1.orders` o on c.CustomerID=o.CustomerID
+-- inner join `e1.order_items` oi on oi.orderID=o.orderID
+-- group by c.CustomerID
+
+
+-- select 
+--   P.ProductID,
+--   P.ProductName,
+--   sum(o.total)
+-- from `e1.products` P inner join `e1.order_items` o on P.ProductID=o.ProductID
+-- group by p.ProductID,P.ProductName;
+
+
+-- select
+--   C.CategoryName,
+--   sum(oi.total) as total_sales
+-- from `e1.categories` C inner join `e1.products` P on C.CategoryID=P.CategoryID inner join `e1.order_items` oi on p.productID=oi.ProductID
+-- group by C.CategoryName;
+
+
+-- select 
+--   s.supplierid,
+--   s.supplierName,
+--   sum(oi.total) as total_sales
+-- from `e1.suppliers` s 
+-- inner join `e1.products` P 
+-- on s.supplierid=p.supplierid 
+-- inner join `e1.order_items` oi 
+-- on P.ProductID=oi.ProductID 
+-- group by s.supplierid,s.supplierName
+
+
+-- select 
+--   p.ProductID,
+--   p.ProductName,
+--   oi.*
+-- from `e1.products` p
+-- left join `e1.order_items` oi
+-- on p.ProductID=oi.ProductID;
+
+
+-- select *
+-- from `e1.products` 
+-- where ProductID not in 
+--                         (select p.productId 
+--                         from `e1.products` p 
+--                         inner join `e1.order_items` oi 
+--                         on p.ProductID=oi.ProductID)
+
+
+-- select 
+--   p.ProductID,
+--   p.ProductName
+-- from `e1.products` p 
+-- left join `e1.order_items` oi
+-- on p.ProductID=oi.ProductID
+-- where oi.total is NULL
+-- group by p.ProductID,p.ProductName;
+
+
+
+-- select
+--   oi.productID,
+--   p.ProductName,
+--   C.CategoryName,
+--   S.SupplierName,
+--   Count(*) as noOfOccurances,
+--   sum(oi.Quantity) as TotalQuantity,
+--   sum(oi.total) as totalSales,
+--   Avg(oi.SellingPrice) as avgSellingPrice
+-- from `e1.products` P inner join `e1.categories` C 
+-- on P.CategoryID=C.CategoryID 
+-- inner Join `e1.suppliers` S 
+-- on P.SupplierID=S.SupplierID 
+-- inner join `e1.order_items` oi 
+-- on P.productID=oi.ProductID 
+-- group by oi.ProductID,p.ProductName,C.CategoryName,S.SupplierName
+-- having totalSales>100000
+-- order by totalSales desc
+-- limit 10;
+
+
+
+-- select 
+--   C.CategoryID,
+--   C.CategoryName,
+--   count(P.ProductID) as NoofProducts,
+--   Avg(P.MRP) as AvgMRP,
+--   Max(P.MRP) as maximumMRP,
+--   Min(P.MRP) as minimumMRP
+-- from `e1.products` P
+-- inner join `e1.categories` C
+-- on P.CategoryID=C.CategoryID
+-- where P.MRP>20000
+-- group by 
+--   C.CategoryID,
+--   C.CategoryName
+-- having NoofProducts>2
+-- order by AvgMRP desc
+
+
+
+-- select
+--   C.CustomerID,
+--   C.Name,
+--   C.City
+-- from `e1.customers` C
+-- left join `e1.orders` o
+-- on c.CustomerID=o.CustomerID
+-- where O.orderID is NULL;
+
+
+
+-- select
+--   S.SupplierID,
+--   S.SupplierName,
+--   Count(P.ProductID) as noOfProductsSupplied,
+--   Avg(P.MRP) as AverageMRP,
+--   coalesce(sum(oi.total),0) as totalSales,
+--   coalesce(sum(oi.Quantity),0) as totalQuantity
+-- from `e1.suppliers` S
+-- left Join `e1.products` P
+-- on P.SupplierID=S.SupplierID
+-- inner join `e1.order_items` oi 
+-- on P.ProductID=oi.ProductID
+-- group by
+--   S.SupplierID,
+--   S.SupplierName
+-- order by totalSales desc
+
+
+-- alter table `e1.warehouses` Rename Column string_field_0 to WarehouseID ;
+-- alter table `e1.warehouses` Rename Column string_field_1 to Warehouse ;
+
+
+-- select
+--   w.Warehouseid,
+--   w.warehouse,
+--   coalesce(count(o.orderid),0) as noOfOrdersHandled,
+--   coalesce(sum(oi.quantity),0) as totalquantitysold,
+--   coalesce(sum(oi.total),0) as totalSales
+-- from `e1.warehouses` w  
+-- Left join `e1.orders` o
+-- on o.warehouseid=w.warehouseid
+-- inner join `e1.order_items` oi
+-- on oi.OrderID=o.OrderID
+-- group by 
+--   w.Warehouseid,
+--   w.warehouse
+-- having totalSales>200000
+-- order by totalSales desc
+
+-- jaruri nhi ki har customer order kharida ho to isliye aise join karke karna h
+-- select
+--   C.CustomerID,
+--   C.Name,
+--   sum(oi.total) as total_spending
+-- from `e1.customers` C
+-- inner join `e1.orders` o on 
+-- C.CustomerID=o.CustomerID
+-- inner join `e1.order_items` oi
+-- on oi.orderid=o.orderid
+-- group by 
+--   C.CustomerID,
+--   C.Name
+-- having total_spending> 
+--                         (
+--                           select 
+--                             round(avg(total_sales),2) as avgCustomerSpending
+--                           from (select 
+--                                   o.CustomerID,
+--                                   sum(total) as total_sales
+--                                 from `e1.order_items` oi
+--                                 inner join `e1.orders` o 
+--                                 on oi.OrderID=o.OrderID
+--                                 group by o.CustomerID
+--                                 )
+--                         )
+-- order by total_spending desc
+
+
+-- select
+--   P.ProductID,
+--   P.ProductName,
+--   C.CategoryName,
+--   sum(oi.total) as total_Sales
+-- from `e1.products` P 
+-- inner join `e1.order_items` oi
+-- on p.productid=oi.ProductID 
+-- inner join `e1.categories` C
+-- on P.CategoryID=C.CategoryID
+-- group by 
+--   P.ProductID,
+--   P.ProductName,
+--   P.CategoryID,
+--   C.CategoryName
+-- having total_Sales> (
+
+--   select
+--     avg(total_Sales) as avgPerCategory
+--   from (
+--   select
+--     p1.ProductID,
+--     sum(oi.total) as total_sales
+--   from `e1.products` p1
+--   inner join `e1.order_items` oi
+--   on p1.ProductID=oi.ProductID
+--   where p1.CategoryID=P.CategoryID
+--   group by p1.ProductID
+-- )
+-- )
+-- order by total_Sales desc
+
+
+-- select 
+--   CustomerID,
+--   Name,
+--   case 
+--   when age Between 18 and 20 then "genZ"
+--   when age  Between 21 and 40 then "adult"
+--   else "senior_citizens"
+--   end as age_groups
+-- from `e1.customers`
+
+
+
+-- select
+--   o.OrderID,
+--   o.OrderDate,
+--   c.Name,
+--   sum(total) as totalOrderValue,
+--   case
+--     when sum(total)>=50000 then "High_Value"
+--     when sum(total)>=20000 then "Medium_Value"
+--     else "Low_Value"
+--   end as OrderCategory
+-- from `e1.order_items` oi
+-- inner join `e1.orders` o
+-- on o.OrderID=oi.OrderID
+-- inner join `e1.customers` C
+-- on c.customerid=o.customerid
+-- group by 
+--   o.OrderID,
+--   o.OrderDate,
+--   c.Name
+-- order by totalOrderValue desc
+
+
+-- select 
+--   c.CustomerID,
+--   sum(oi.total) as total_spent
+-- from `e1.customers` c
+-- inner join `e1.orders` o
+-- on o.customerid=c.CustomerID
+-- inner join `e1.order_items` oi
+-- on oi.OrderID=o.OrderID
+-- group by c.CustomerID
+-- having total_spent>(
+--   select
+--     avg(total_spent)
+--   from (
+--   select
+--     o.customerid,
+--     sum(total) as total_spent
+--   from `e1.order_items` oi
+--   inner join `e1.orders` o
+--   on oi.orderid=o.orderid
+--   group by o.customerid
+-- )
+-- )
+
+
+
+-- select
+--   P.ProductID,
+--   P.ProductName,
+--   C.CategoryName,
+--   sum(total) as total_sales_value
+-- from `e1.products` p
+-- inner join `e1.order_items` oi
+-- on oi.ProductID=p.ProductID
+-- inner join `e1.categories` C
+-- on c.categoryid=p.CategoryID
+-- group by
+--   P.ProductID,
+--   P.ProductName,
+--   C.CategoryName,
+--   p.CategoryID
+-- having total_sales_value> (
+--   select
+--   avg(total_Sales) 
+--   from (
+--     select
+--       p1.ProductID,
+--       p1.CategoryID as Cid,
+--       sum(total) as total_Sales
+--     from `e1.products` p1
+--     inner join `e1.order_items` oi
+--     on oi.productid=p1.ProductID
+--     group by p1.productid,p1.CategoryID
+--   )
+--   where Cid=p.CategoryID
+--   group by Cid
+-- )
+
+-- select 
+--   case
+--   when gender='F' then "Female"
+--   when gender='M' then "Male"
+--   else "Not prefer to say"
+--   end as Gender
+-- from `e1.customers` 
+
+-- select 
+--   c.CategoryID,
+--   c.CategoryName,
+--   count(distinct p.ProductID) as noOfProducts,
+--   count(distinct oi.ProductID) as noOfProductsSold,
+--   sum(oi.quantity) as totalQuantity,
+--   sum(total) as totalSalesValue,
+--   round(avg(oi.SellingPrice),2) as avgSellingPrice
+-- from `e1.categories` c
+-- inner join `e1.products` p
+-- on p.categoryid=c.CategoryID
+-- inner join `e1.order_items` oi
+-- on oi.ProductID=p.ProductID
+-- where oi.SellingPrice>1000
+-- group by
+--   c.CategoryID,
+--   c.CategoryName
+-- having totalSalesValue>5000
+-- order by totalSalesValue desc
+
+
+
+-- select
+--   p.ProductID,
+--   p.ProductName,
+--   c.CategoryName,
+--   p.MRP,
+--   p.SellingPrice,
+--   (p.MRP-p.SellingPrice)*100/p.MRP as Discount_Percentage,
+--   sum(oi.total) as total_Sales
+-- from `e1.products` p
+-- inner join `e1.categories` c
+-- on p.categoryid=c.CategoryID
+-- inner join `e1.order_items` oi
+-- on oi.productid=p.productid
+-- where p.MRP>15000 and (p.MRP-p.SellingPrice)*100/p.MRP>20
+-- group by 
+--   p.ProductID,
+--   p.ProductName,
+--   c.CategoryName,
+--   p.MRP,
+--   p.SellingPrice,
+--   (p.MRP-p.SellingPrice)*100/p.MRP 
+-- having total_Sales>75000
+
+
+-- select
+--   o.EmployeeID,
+--   e.Name,
+--   e.Department,
+--   count(distinct o.OrderID) as NoOfOrdersHandled,
+--   count(distinct o.CustomerID) as NoOfCustomersServed
+-- from `e1.employees` e
+-- inner join `e1.orders` o
+-- on o.EmployeeID=e.EmployeeID
+-- inner join `e1.order_items` oi
+-- on oi.OrderID=o.OrderID
+-- group by 
+--   o.EmployeeID,
+--   e.Name,
+--   e.Department
+-- having NoOfOrdersHandled>=5
+-- order by NoOfOrdersHandled desc
+
+
+
+-- select
+--   c.city,
+--   count(distinct c.CustomerID) as noOfCustomers,
+--   count(distinct o.OrderID) as noOfOrders,
+--   sum(oi.Total) as totalSalesValue,
+--   avg(oi.Total)  as avgOrderItemValue
+-- from `e1.customers` c
+-- inner join `e1.orders` o 
+-- on o.CustomerID=c.CustomerID
+-- inner join `e1.order_items` oi
+-- on oi.OrderID=o.OrderID
+-- group by c.City
+-- having totalSalesValue>300000
+-- order by totalSalesValue desc 
+
+-- select
+--   p.ProductID,
+--   p.ProductName,
+--   count(distinct oi.OrderID) as NoOfOrders,
+--   sum(oi.quantity) as totalQuantity,
+--   avg(oi.SellingPrice) as avgSellingPrice
+-- from `e1.products` p
+-- inner join `e1.order_items` oi
+-- on oi.ProductID=p.ProductID
+-- group by 
+--   p.ProductID,
+--   p.ProductName
+-- having avgSellingPrice>=15000
+-- order by avgSellingPrice desc 
+
+
+-- select
+--   c.CategoryName,
+--   count(distinct p.ProductID) as no_of_products,
+--   min(p.MRP) as min_MRP,
+--   max(p.MRP) as max_MRP,
+--   max(p.MRP)-min(p.MRP) as difference
+-- from `e1.categories` c
+-- inner join `e1.products` p
+-- on c.CategoryID=p.CategoryID
+-- group by
+--   c.CategoryName
+-- having difference >1000
+
+
+-- select
+--   p.Method,
+--   count(p.PaymentID) as no_of_successfull_t,
+--   sum(p.amount) as total_s_p_amount,
+--   round(avg(p.amount),2) as avg_S_p_amount,
+--   max(p.amount) as max_s_t_amount
+-- from `e1.payments` p 
+-- where status="Success"
+-- group by
+--   p.Method
+-- having no_of_successfull_t>10
+-- order by avg_S_p_amount desc
+
+
+-- select
+--   p.ProductID,
+--   p.ProductName,
+--   c.CategoryName,
+--   sum(oi.quantity) as total_quantity_sold,
+--   sum(oi.total) as total_Sales_value
+-- from `e1.products` p
+-- inner join `e1.categories` c
+-- on p.CategoryID=c.CategoryID
+-- inner join `e1.order_items` oi
+-- on oi.ProductID=p.ProductID
+-- group by 
+--   p.ProductID,
+--   p.ProductName,
+--   c.CategoryName
+-- order by total_quantity_sold desc
+-- limit 15
+
+
+-- select
+--   w.WarehouseID,
+--   w.Warehouse,
+--   count(*) as no_of_inventory_records,
+--   sum(i.stock) as total_Stocks,
+--   avg(i.stock) as avg_stocks,
+--   max(i.stock) as higghest_stock
+-- from `e1.warehouses` w
+-- inner join `e1.inventory` i
+-- on i.warehouseid=w.WarehouseID
+-- group by 
+--   w.WarehouseID,
+--   w.Warehouse
+-- having avg_stocks>100
+-- order by total_Stocks desc
+
+
+-- select
+--   p.ProductID,
+--   p.productName,
+--   p.Supplierid,
+--   count(i.WarehouseID) as no_of_inventory_Records,
+--   sum(i.stock) as total_stocks
+-- from `e1.products` p
+-- left join `e1.order_items` oi
+-- on oi.productid=p.ProductID
+-- inner join `e1.inventory` i
+-- on p.productid=i.ProductID
+-- where oi.productid is NULL
+-- group by
+--   p.ProductID,
+--   p.productName,
+--   p.Supplierid
+-- order by total_stocks desc
+
+
+
+-- select 
+--   s.SupplierName,
+--   count(p.ProductID) as total_products_supp,
+--   avg(p.MRP) as avg_mrp,
+--   max(p.MRP) as max_mrp,
+--   min(p.MRP) as min_mrp,
+--   case 
+--   when avg(p.MRP)>=30000 then "Premium_Supplier"
+--   when avg(p.MRP)>=15000 then "Mid-Range_Supplier"
+--   else "Budget_Supplier"
+--   end as supplier_Category
+-- from `e1.products` p
+-- inner join `e1.suppliers` s
+-- on p.supplierid=s.SupplierID
+-- group by 
+--   s.SupplierName
+-- order by max_mrp desc
+
+-- select
+--   c.customerid,
+--   c.Name,
+--   count(distinct p.categoryID) as no_of_categories_purchased,
+--   sum(oi.quantity) as total_quantity_purchased,
+--   sum(oi.total) as total_amount_spent
+-- from `e1.customers` c
+-- inner join `e1.orders` o
+-- on o.customerid=c.CustomerID
+-- inner join `e1.order_items` oi
+-- on oi.orderid=o.orderid
+-- inner join `e1.products` p
+-- on p.productid=oi.productid
+-- group by 
+--   c.customerid,
+--   c.Name
+-- having no_of_categories_purchased>=3
+-- order by no_of_categories_purchased desc
+
+
+-- select
+--   c.CustomerID,
+--   c.Name,
+--   count(distinct p.OrderID) as no_of_failed_orders,
+--   sum(p.amount) as total_value
+-- from `e1.customers` c
+-- inner join `e1.orders` o
+-- on o.customerid=c.CustomerID
+-- inner join `e1.payments` p
+-- on o.orderid=p.Orderid
+-- where p.status="Failed"
+-- group by
+--   c.CustomerID,
+--   c.Name
+-- order by total_value desc
+
+
+
+-- select
+--   e.EmployeeID,
+--   e.Name,
+--   count(oi.orderid) as no_of_high_val_orders,
+--   sum(oi.total_val) as total_val_high_val_orders,
+--   avg(oi.total_val) as avg_val_high_val_orders
+-- from `e1.employees` e
+-- inner join `e1.orders` o
+-- on o.EmployeeID=e.EmployeeID
+-- inner join (select 
+--   orderid,
+--   sum(total) as total_val
+-- from `e1.order_items` 
+-- group by
+--   orderid
+-- having total_val>75000) as oi
+-- on oi.orderid=o.orderid
+-- group by
+--   e.EmployeeID,
+--   e.Name
+-- order by total_val_high_val_orders desc
+
+
+
+-- select
+--   p.ProductID,
+--   p.ProductName,
+--   c.CategoryName,
+--   p.MRP as MRP
+-- from `e1.products` p
+-- inner join `e1.categories` c
+-- on p.categoryid=c.categoryid
+-- where p.MRP>(
+--   select
+--   avg(mrp)
+--   from `e1.products` 
+-- )
+-- order by p.MRP desc
+
+
+
+-- select
+--   w.warehouseid,
+--   w.Warehouse,
+--   sum(i.stock) as total_stock,
+--   round(avg(i.stock),2) as Avg_stock,
+--   case
+--   when sum(i.stock)>=5000 then "High Stock"
+--   when sum(i.stock)>=2500 then "Medium Stock"
+--   else "Low Stock"
+--   end as stock_Classification
+-- from `e1.inventory` i
+-- inner join `e1.warehouses` w
+-- on w.warehouseid=i.WarehouseID
+-- group by 
+--   w.warehouseid,
+--   w.Warehouse
+
+
+-- select
+--   c.CustomerID,
+--   c.Name,
+--   count(distinct o.OrderDate) as no_of_diff_order_dates,
+--   count(o.orderid) as total_orders,
+--   sum(oi.quantity) as total_quantity_purchased
+-- from `e1.customers` c
+-- inner join `e1.orders` o
+-- on o.customerid=c.CustomerID
+-- inner join `e1.order_items` oi
+-- on oi.orderid=o.Orderid
+-- where c.customerid in (
+--   select
+--   customerid
+--   from `e1.orders` 
+--   group by customerid
+--   having count(distinct orderDate)>2
+-- )
+-- group by
+--   c.CustomerID,
+--   c.Name
+-- order by no_of_diff_order_dates desc
+
+
+-- select
+--   c.CategoryName,
+--   p.ProductID,
+--   p.ProductName,
+--   p.MRP
+-- from `e1.categories` c
+-- inner join `e1.products` p
+-- on p.categoryid=c.CategoryID
+-- inner join (
+--   select
+--     CategoryID,
+--     max(MRP) as max_MRP
+--   from `e1.products`
+--   group by 
+--   CategoryID
+-- ) sub 
+-- on sub.categoryid=p.CategoryID 
+-- and p.mrp=sub.max_MRP
+-- order by c.CategoryName;
+
+
+-- select
+--   ProductID,
+--   SellingPrice,
+--   avg(SellingPrice) over(Partition by ProductID) as avg_Sp
+-- from `e1.order_items` 
+
+
+-- select
+--   ProductID,
+--   OrderID,
+--   count(OrderID) over(Partition by ProductID) as total_orders
+-- from `e1.order_items` 
+
+-- select
+--   OrderID,
+--   ProductID,
+--   total,
+--   sum(total) over () as total_Sales_across
+-- from `e1.order_items`
+
+
+-- select
+--   ProductID,
+--   SellingPrice,
+--   avg(SellingPrice) over(partition by ProductID) as avg_SP
+-- from `e1.order_items` 
+
+
+-- select
+--   OrderID,
+--   total,
+--   row_number() over(order by total desc) as row_num
+-- from `e1.order_items`
+
+
+-- with product_sales as (
+--   select
+--     productid,
+--     sum(total) as total_sales
+--   from `e1.order_items`
+--   group by ProductID
+-- )
+-- -- select
+-- --   productid,
+-- --   total_sales,
+-- --   rank() over(order by total_sales desc) as rankings
+-- -- from product_sales
+
+-- select
+--   productid,
+--   total_sales,
+--   dense_rank() over(order by total_sales desc) as rankings
+-- from product_sales
+
+
+-- select
+--   c.CustomerID,
+--   coalesce(count(o.orderid),0) as total_orders
+-- from `e1.customers` c
+-- left join `e1.orders` o
+-- on o.CustomerID=c.CustomerID
+-- group by c.CustomerID
+
+
+
+-- select
+--   C.Name,
+--   p.ProductName,
+--   ca.CategoryName,
+--   oi.quantity as total_quantity,
+--   oi.SellingPrice as SP,
+--   oi.Total as total
+-- from `e1.orders` o
+-- inner join `e1.customers` c
+-- on o.CustomerID=c.CustomerID
+-- inner join `e1.order_items` oi
+-- on oi.OrderID=o.OrderID
+-- inner join `e1.products` p
+-- on p.productid=oi.ProductID
+-- inner join `e1.categories` ca
+-- on ca.categoryid=p.CategoryID
+
+
+-- select
+--   p.CategoryID,
+--   p.SupplierID,
+--   sum(oi.total) as total_Sales
+-- from `e1.order_items` oi
+-- inner join `e1.products` p
+-- on p.productid=oi.ProductID
+-- group by 
+--   p.CategoryID,
+--   p.SupplierID
+
+
+-- select
+--   c.CustomerID,
+--   c.Name,
+--   count(distinct oi.ProductID) as total_products
+-- from `e1.order_items` oi
+-- inner join `e1.orders` o
+-- on o.OrderID=oi.OrderID
+-- inner join `e1.customers` c
+-- on c.customerid=o.CustomerID
+-- group by 
+--   c.CustomerID,
+--   c.Name
+-- order by total_products desc
+
+
+-- select
+--   c.CategoryID,
+--   c.CategoryName,
+--   sum(oi.total) as total_Sales,
+--   count(distinct oi.productid) as diff_products_sold
+-- from `e1.categories` c
+-- inner join `e1.products` p
+-- on p.categoryid=c.CategoryID
+-- inner join `e1.order_items` oi
+-- on oi.ProductID=p.ProductID
+-- group by
+--   c.CategoryID,
+--   c.CategoryName
+-- having total_Sales>100000
+-- order by total_Sales desc
+
+
+
+-- select
+--   c.CustomerID,
+--   c.Name,
+--   c.City,
+--   sum(oi.Total) as total_spent
+-- from `e1.customers` c
+-- inner join `e1.orders` o
+-- on c.customerid=o.customerid
+-- inner join `e1.order_items` oi
+-- on oi.orderid=o.orderid
+-- group by 
+--   c.CustomerID,
+--   c.Name,
+--   c.City
+-- having total_spent>50000
+-- order by total_spent desc
+
+
+-- select
+--   s.SupplierID,
+--   s.SupplierName,
+--   count(p.ProductID) as no_of_products_supp,
+--   sum(oi.total) as total_Sales_generated
+-- from `e1.products` p
+-- inner join `e1.suppliers` s
+-- on s.supplierid=p.SupplierID
+-- inner join `e1.order_items` oi
+-- on oi.productid=p.ProductID
+-- group by 
+--   s.SupplierID,
+--   s.SupplierName
+-- having total_Sales_generated>200000
+-- order by total_Sales_generated desc
+
+
+
+-- select
+--   CustomerID,
+--   OrderID,
+--   OrderDate,
+--   row_number() over(partition by CustomerID order by OrderDate asc) as order_number
+-- from `e1.orders` 
+
+
+
+-- select
+--   c.CustomerID,
+--   c.Name,
+--   count(p.PaymentID) as no_of_successfull_payments,
+--   sum(p.amount) as total_payment_amount
+-- from `e1.customers` c
+-- inner join `e1.orders` o
+-- on o.customerid=c.CustomerID
+-- inner join `e1.payments` p
+-- on p.orderid=o.OrderID
+-- where p.status="Success"
+-- group by
+--   c.CustomerID,
+--   c.Name
+-- having total_payment_amount>50000
+
+
+-- select
+--   c.CategoryName,
+--   count(p.ProductID) as no_of_products,
+--   avg(p.MRP) as avg_MRP,
+--   avg(p.SellingPrice) as avg_SP,
+--   round(avg(p.MRP-p.SellingPrice),2) as avg_discount_amount
+-- from `e1.categories` c
+-- inner join `e1.products` p
+-- on p.categoryid=c.CategoryID
+-- group by 
+--   c.CategoryName
+-- having no_of_products>=5
+-- order by avg_discount_amount desc
+
+
+-- select
+--   s.SupplierName,
+--   coalesce(count(p.ProductID),2) as no_of_products_supp,
+--   coalesce(count(oi.OrderID),0) as no_of_order_item_records,
+--   coalesce(sum(oi.quantity),0) as total_quantity_sold,
+--   coalesce(sum(total),0) as total_Sales_value
+-- from `e1.suppliers` s
+-- left join `e1.products` p
+-- on p.supplierid=s.SupplierID
+-- inner join `e1.order_items` oi
+-- on oi.productid=p.ProductID
+-- group by
+--   s.SupplierName
+-- order by total_Sales_value desc
+
+
+
+-- select
+--   w.Warehouse,
+--   coalesce(count(o.OrderID),0) as no_of_orders_handled,
+--   coalesce(sum(i.stock),0) as total_stock,
+--   coalesce(round(avg(i.stock),2),0) as avg_stock
+-- from `e1.warehouses` w
+-- left join `e1.inventory` i
+-- on i.WarehouseID=w.Warehouseid
+-- left join `e1.orders` o
+-- on o.WarehouseID=w.WarehouseID
+-- group by
+--   w.Warehouse
+
+
+-- select
+--   c.CategoryID,
+--   c.CategoryName,
+--   avg(p.SellingPrice) as avg_selling_price
+-- from `e1.categories` c
+-- inner join `e1.products` p
+-- on p.CategoryID=c.CategoryID
+-- group by 
+--   c.CategoryID,
+--   c.CategoryName
+-- order by avg_selling_price desc 
+-- limit 1
+
+
+-- select
+--   s.SupplierName,
+--   p.ProductName,
+--   p.SellingPrice,
+--   rank() over(partition by s.SupplierName order by p.SellingPrice desc) as Supplier_Rank
+-- from `e1.products` p
+-- inner join `e1.suppliers` s
+-- on p.supplierid=s.SupplierID
+
+
+-- select current_date() as today;
+
+-- select
+--   CustomerID,
+--   Name,
+--   SignupDate
+-- from `e1.customers`
+-- where SignupDate>=date_sub(current_date(),interval 1000 day)
+
+
+
+-- select
+--   extract(month from orderDate),
+--   extract(year from orderDate),
+--   count(OrderID)
+-- from `e1.orders`
+-- group by extract(month from orderDate),extract(year from orderDate)
+
+
+
+-- select
+--   extract(month from orderDate),
+--   sum(oi.total) as total_Sales
+-- from `e1.orders` o
+-- inner join `e1.order_items` oi
+-- on oi.orderid=o.OrderID
+-- group by extract(month from orderDate)
+
+
+-- select
+--   CustomerID,
+--   DATE_DIFF(current_date(),SignupDate, DAY) as no_of_days_registered
+-- from `e1.customers`
+
+-- select
+--   c.customerid,
+--   c.Name,
+--   c.City,
+--   count(o.Orderid) as no_of_orders
+-- from `e1.customers` c
+-- inner join `e1.orders` o
+-- on o.customerid=c.customerid
+-- group by 
+--   c.customerid,
+--   c.Name,
+--   c.City
+-- having no_of_orders>=5
+
+
+-- select
+--   customerid,
+--   OrderID,
+--   OrderDate,
+--   row_number() over(partition by CustomerID order by orderDate,orderid asc) as order_number
+-- from `e1.orders` 
+
+
+
+-- SELECT 
+--   format_date('%A',OrderDate) as DAY,
+--   COUNT(OrderID) AS no_of_orders
+-- FROM `e1.orders`
+-- where format_date('%A',OrderDate) in ("Saturday","Sunday")
+-- group by day
+
+
+-- select
+--   case
+--   when (extract(dayofweek from orderdate) in (1,7)) then "Weekend"
+--   else "weekday"
+--   end as Order_classification,
+--   count(*) as order_count
+-- from `e1.orders`
+-- group by order_classification
+
+
+-- select
+--   extract(month from signupdate) as months_num,
+--   format_Date('%B',signupdate) as months,
+--   count(customerid) as no_of_custmers
+-- from `e1.customers` 
+-- group by months_num,months
+
+
+-- select
+--   case
+--   when extract(month from orderdate) in (1,6) then "First Half"
+--   else "Second Half"
+--   end as classification,
+--   sum(oi.total) as total_Sales
+-- from `e1.orders` o
+-- inner join `e1.order_items` oi
+-- on o.orderid=oi.OrderID
+-- group by classification
+
+-- select
+--   format_Date('%A',signupdate) as day,
+--   count(*) as no_of_signups
+-- from `e1.customers`
+-- group by day
+-- order by no_of_signups desc limit 1
+
+
+-- with new_table as (
+-- select
+--   CustomerID,
+--   orderdate,
+--   row_number() over(partition by customerid order by orderdate) as row_num
+-- from `e1.orders`
+-- )
+
+-- select
+--   nt.customerid,
+--   c.name,
+--   nt.orderdate
+-- from new_table nt
+-- inner join `e1.customers` c
+-- on c.customerid=nt.customerid
+-- where nt.row_num=1 and extract(month from orderdate)=extract(month from signupdate) and extract(year from orderdate)=extract(year from signupdate)
+
+
+-- select
+--   sum(oi.total) as total_Sales
+-- from `e1.orders` o
+-- inner join `e1.order_items` oi
+-- on oi.orderid=o.orderid
+
+
+-- select
+--   format_date('%B',signupdate) as month,
+--   count(*) as no_of_customers
+-- from `e1.customers` 
+-- group by month
+
+
+
+-- select
+--   format_date('%B',c.signupdate) as signup_month,
+--   count(o.orderid) as no_of_orders
+-- from `e1.orders` o
+-- inner join `e1.customers` c
+-- on o.customerid=c.customerid
+-- group by signup_month
+
+
+select
+  format_date('%B',c.signupdate) as signup_month,
+  coalesce(sum(oi.total),0) as total_Sales
+from `e1.customers` c
+left join `e1.orders` o 
+on o.customerid=c.customerid
+inner join `e1.order_items` oi
+on oi.orderid=o.orderid
+group by signup_month
